@@ -136,15 +136,15 @@ void updateData(int *jumlahData){
 }
 
 void hapusData(){
-    //grace
+    //grace smangat
 }
 
 void cetakTabel(int jumlahData){
-    //grace
+    //grace smangat
 }
 
 void tampilData(){
-    //grace
+    //grace smangit
 }
 
 bool sortedBy(data_motor a, data_motor b, int sortBy, int sortOrder){
@@ -284,7 +284,7 @@ void sorting(int jumlahData){
 }
 
 void searching(){
-    //grace
+    //grace smungut
 }
 
 
