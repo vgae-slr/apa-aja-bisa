@@ -136,15 +136,92 @@ void updateData(int *jumlahData){
 }
 
 void hapusData(){
-    //grace smangat
+    string plat;
+    bool ditemukan = false;
+
+    cout << "Masukkan No. Plat yang ingin dihapus : ";
+    cin.ignore();
+    getline(cin, plat);
+
+    for(int i = 0; i < 1000; i++){
+        if(motor[i].no_plat == plat){
+            ditemukan = true;
+
+            for(int j = i; j < 999; j++){
+                motor[j] = motor[j + 1];
+            }
+
+            cout << "Data berhasil dihapus.\n";
+            break;
+        }
+    }
+
+    if(!ditemukan){
+        cout << "Data tidak ditemukan.\n";
+    }
+
+    system("pause");
 }
 
 void cetakTabel(int jumlahData){
-    //grace smangat
+    cout << left
+         << setw(12) << "TglMasuk"
+         << setw(12) << "Plat"
+         << setw(15) << "STNK"
+         << setw(15) << "Merek"
+         << setw(15) << "Warna"
+         << setw(20) << "Pemilik"
+         << setw(15) << "HP"
+         << setw(12) << "TglKeluar"
+         << endl;
+
+    cout << string(116,'-') << endl;
+
+    for(int i = 0; i < jumlahData; i++){
+        cout << setw(2) << motor[i].tanggal_masuk << "/"
+             << setw(2) << motor[i].bulan_masuk << "/"
+             << setw(4) << motor[i].tahun_masuk;
+
+        cout << setw(12) << motor[i].no_plat
+             << setw(15) << motor[i].no_stnk
+             << setw(15) << motor[i].merek_motor
+             << setw(15) << motor[i].warna_motor
+             << setw(20) << motor[i].nama_pemilik
+             << setw(15) << motor[i].no_hp;
+
+        cout << motor[i].tanggal_keluar << "/"
+             << motor[i].bulan_keluar << "/"
+             << motor[i].tahun_keluar
+             << endl;
+    }
 }
 
 void tampilData(){
-    //grace smangit
+    string fileDipilih;
+
+    daftarFile();
+
+    cout << "\nNama file yang ingin dibuka : ";
+    cin >> fileDipilih;
+
+    ifstream file(fileDipilih);
+
+    if(!file.is_open()){
+        cout << "File tidak ditemukan!\n";
+        return;
+    }
+
+    string baris;
+
+    cout << "\nISI FILE\n";
+    cout << setfill('=') << setw(80) << "=" << endl;
+    cout << setfill(' ');
+
+    while(getline(file, baris)){
+        cout << baris << endl;
+    }
+
+    file.close();
 }
 
 bool sortedBy(data_motor a, data_motor b, int sortBy, int sortOrder){
@@ -284,7 +361,34 @@ void sorting(int jumlahData){
 }
 
 void searching(){
-    //grace smungut
+    string cari;
+    bool ditemukan = false;
+
+    cout << "Masukkan No. Plat yang dicari : ";
+    cin.ignore();
+    getline(cin, cari);
+
+    for(int i = 0; i < 1000; i++){
+        if(motor[i].no_plat == cari){
+
+            cout << "\nDATA DITEMUKAN\n";
+            cout << "No. Plat      : " << motor[i].no_plat << endl;
+            cout << "No. STNK      : " << motor[i].no_stnk << endl;
+            cout << "Merek Motor   : " << motor[i].merek_motor << endl;
+            cout << "Warna Motor   : " << motor[i].warna_motor << endl;
+            cout << "Nama Pemilik  : " << motor[i].nama_pemilik << endl;
+            cout << "No. HP        : " << motor[i].no_hp << endl;
+
+            ditemukan = true;
+            break;
+        }
+    }
+
+    if(!ditemukan){
+        cout << "Data tidak ditemukan.\n";
+    }
+
+    system("pause");
 }
 
 
