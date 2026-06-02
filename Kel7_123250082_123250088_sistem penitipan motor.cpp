@@ -4,14 +4,14 @@
 #include <fstream>
 #include <string>
 #include <windows.h>
+#include <sstream>
 using namespace std;
 
 string namaFile;
 
 struct data_motor{
-    long no_stnk, no_hp;
     int tanggal_masuk, bulan_masuk, tahun_masuk, tanggal_keluar, bulan_keluar, tahun_keluar;
-    string merek_motor, nama_pemilik, warna_motor, no_plat;
+    string merek_motor, nama_pemilik, warna_motor, no_plat, no_hp, no_stnk;
 } motor[1000];
 
 void daftarFile(){
@@ -34,15 +34,78 @@ void daftarFile(){
     }
 }
 
+void muatData(string fileDipilih, int *jumlahData){
+    *jumlahData = 0;
+    string baris, masuk, keluar;
+    
+    ifstream file(fileDipilih);
+
+    if(!file.is_open()){
+        cout << "File tidak ditemukan!\n";
+        return;
+    }
+
+    while(getline(file, baris)){
+        if(!baris.empty() && baris.back() == '\r'){
+			baris.pop_back();
+		}
+        
+        if(baris.empty()){
+				continue;
+		}
+        
+        stringstream ss(baris);
+        char garing;
+
+        if(getline(ss, masuk, '|') &&
+			getline(ss, keluar, '|') &&
+            getline(ss, motor[*jumlahData].no_plat, '|') &&
+            getline(ss, motor[*jumlahData].no_stnk, '|') &&
+            getline(ss, motor[*jumlahData].merek_motor, '|') &&
+            getline(ss, motor[*jumlahData].warna_motor, '|') &&
+            getline(ss, motor[*jumlahData].nama_pemilik, '|') &&
+            getline(ss, motor[*jumlahData].no_hp, '|') )
+        {
+            stringstream(masuk) >> motor[*jumlahData].tanggal_masuk >> garing
+                                >> motor[*jumlahData].bulan_masuk >> garing
+                                >> motor[*jumlahData].tahun_masuk;
+            
+            stringstream(keluar) >> motor[*jumlahData].tanggal_keluar >> garing
+                                 >> motor[*jumlahData].bulan_keluar >> garing
+                                 >> motor[*jumlahData].tahun_keluar;
+
+			(*jumlahData)++;
+        }
+
+    }
+
+    file.close();
+}
+
 void inputData(int *jumlahData){
-    int tambah;
+    int tambah, pilihan;
     *jumlahData = 0;
 
     cout << "\nINPUT DATA" << endl;
     cout << setw(30) << setfill('=') << "=" << endl;
-    cout << "Disimpan di file bernama (tanpa spasi) : ";
-    cin >> namaFile;
+
+    cout << "1. Tambah data\n";
+    cout << "2. File baru\n";
+    cout << "Pilih : ";
+    cin >> pilihan;
+
+    if(pilihan == 2){
+        cout << "Disimpan di file bernama (tanpa spasi) : ";
+        cin >> namaFile;
+    } else {
+        daftarFile();
+        cout << "Nama file : ";
+        cin >> namaFile;
+    }
+
     cin.ignore();
+    system("pause");
+    system("cls");
 
     fstream file(namaFile, ios::app);
     if(!file.is_open()){
@@ -111,8 +174,11 @@ void inputData(int *jumlahData){
 
 void updateData(int *jumlahData){
     int update;
-    char tanggal_keluar[11];
-    string plat_update;
+    string plat_update, fileUp, keluar;
+
+    daftarFile();
+    cout << "Update data dari file : ";
+    cin >> fileUp;
 
     cout << "No. Plat motor yang diupdate : ";
     cin.ignore();
@@ -125,42 +191,41 @@ void updateData(int *jumlahData){
         }
     }
 
+    cout << "Motor ber-plat " << motor[update].no_plat << " :\n";
     cout << "Tanggal Keluar (dd/mm/yyyy) : ";
-    cin >> tanggal_keluar;
-    sscanf(tanggal_keluar, "%d/%d/%d", 
-            &motor[update].tanggal_keluar,
-            &motor[update].bulan_keluar,
-            &motor[update].tahun_keluar);
+    getline(cin, keluar);
+
+    stringstream ss(keluar);
+    char garing;
+
+    ss >> motor[update].tanggal_keluar >> garing
+        >> motor[update].bulan_keluar >> garing
+        >> motor[update].tahun_keluar;
     
     cout << "Tanggal keluar telah diupdate.\n";
-}
 
-void hapusData(){
-    string plat;
-    bool ditemukan = false;
-
-    cout << "Masukkan No. Plat yang ingin dihapus : ";
-    cin.ignore();
-    getline(cin, plat);
-
-    for(int i = 0; i < 1000; i++){
-        if(motor[i].no_plat == plat){
-            ditemukan = true;
-
-            for(int j = i; j < 999; j++){
-                motor[j] = motor[j + 1];
-            }
-
-            cout << "Data berhasil dihapus.\n";
-            break;
+    ofstream file(fileUp);
+    if(!file.is_open()){
+        cout << "Gagal buka file.\n";
+        return;
+    } else {
+        for(int i = 0; i < *jumlahData; i++){
+            file << motor[i].tanggal_masuk << "/"
+                 << motor[i].bulan_masuk << "/"
+                 << motor[i].tahun_masuk << "|"
+                 << motor[i].tanggal_keluar << "/"
+                 << motor[i].bulan_keluar << "/"
+                 << motor[i].tahun_keluar << "|"
+                 << motor[i].no_plat << "|"
+                 << motor[i].no_stnk << "|"
+                 << motor[i].merek_motor << "|"
+                 << motor[i].warna_motor << "|"
+                 << motor[i].nama_pemilik << "|"
+                 << motor[i].no_hp << endl;
         }
-    }
 
-    if(!ditemukan){
-        cout << "Data tidak ditemukan.\n";
+        file.close();
     }
-
-    system("pause");
 }
 
 void cetakTabel(int jumlahData){
@@ -170,7 +235,7 @@ void cetakTabel(int jumlahData){
          << setw(15) << "STNK"
          << setw(15) << "Merek"
          << setw(15) << "Warna"
-         << setw(20) << "Pemilik"
+         << setw(15) << "Pemilik"
          << setw(15) << "HP"
          << setw(12) << "TglKeluar"
          << endl;
@@ -180,13 +245,13 @@ void cetakTabel(int jumlahData){
     for(int i = 0; i < jumlahData; i++){
         cout << setw(2) << motor[i].tanggal_masuk << "/"
              << setw(2) << motor[i].bulan_masuk << "/"
-             << setw(4) << motor[i].tahun_masuk;
+             << setw(4) << motor[i].tahun_masuk << " ";
 
-        cout << setw(12) << motor[i].no_plat
+        cout << setw(13) << motor[i].no_plat
              << setw(15) << motor[i].no_stnk
              << setw(15) << motor[i].merek_motor
              << setw(15) << motor[i].warna_motor
-             << setw(20) << motor[i].nama_pemilik
+             << setw(15) << motor[i].nama_pemilik
              << setw(15) << motor[i].no_hp;
 
         cout << motor[i].tanggal_keluar << "/"
@@ -196,32 +261,56 @@ void cetakTabel(int jumlahData){
     }
 }
 
-void tampilData(){
-    string fileDipilih;
-
-    daftarFile();
-
-    cout << "\nNama file yang ingin dibuka : ";
-    cin >> fileDipilih;
-
-    ifstream file(fileDipilih);
-
-    if(!file.is_open()){
-        cout << "File tidak ditemukan!\n";
-        return;
-    }
-
-    string baris;
+void tampilData(int *jumlahData){
 
     cout << "\nISI FILE\n";
-    cout << setfill('=') << setw(80) << "=" << endl;
+    cout << setfill('=') << setw(116) << "=" << endl;
     cout << setfill(' ');
 
+    cetakTabel(*jumlahData);
+}
+
+void hapusData(string fileDipilih, int *jumlahData){
+    string plat, baris;
+
+    fstream file(fileDipilih, ios::in);
+    fstream temp("temp.txt", ios::out);
+
+    cout << "Masukkan No. Plat yang ingin dihapus : ";
+    cin.ignore();
+    getline(cin, plat);
+
     while(getline(file, baris)){
-        cout << baris << endl;
+        if(baris.empty()){
+            continue;
+        }
+
+        stringstream ss(baris);
+        string masuk, keluar, no_plat, no_stnk, merek, warna, pemilik, no_hp;
+
+        if(getline(ss, masuk, '|') &&
+			getline(ss, keluar, '|') &&
+            getline(ss, no_plat, '|') &&
+            getline(ss, no_stnk, '|') &&
+            getline(ss, merek, '|') &&
+            getline(ss, warna, '|') &&
+            getline(ss, pemilik, '|') &&
+            getline(ss, no_hp, '|') ){
+
+            if(no_plat != plat){
+                temp << baris << endl;
+            }
+        }
     }
 
     file.close();
+    temp.close();
+
+    remove(fileDipilih.c_str());
+    rename("temp.txt", fileDipilih.c_str());
+
+    cout << "Berhasil.\n";
+    system("pause");
 }
 
 bool sortedBy(data_motor a, data_motor b, int sortBy, int sortOrder){
@@ -333,13 +422,14 @@ void sorting(int jumlahData){
         cout<<endl<<endl;
 
         cout<<"Urutan secara:\n";
-        cout<<"1. Ascending\n";
-        cout<<"2. Descending\n";
+        cout<<"1. Descending\n";
+        cout<<"2. Ascending\n";
         cout<<"Pilih : ";
         cin>>sortOrder;
 
         system("cls");
         
+        insertionSort(jumlahData, sortBy, sortOrder);
         cetakTabel(jumlahData);
         system("pause");
 
@@ -360,7 +450,7 @@ void sorting(int jumlahData){
     } while((sortBy <= 8) && (sortBy >= 1));
 }
 
-void searching(){
+void searching(int jumlahData){
     string cari;
     bool ditemukan = false;
 
@@ -368,7 +458,7 @@ void searching(){
     cin.ignore();
     getline(cin, cari);
 
-    for(int i = 0; i < 1000; i++){
+    for(int i = 0; i < jumlahData; i++){
         if(motor[i].no_plat == cari){
 
             cout << "\nDATA DITEMUKAN\n";
@@ -395,6 +485,7 @@ void searching(){
 int main(){
     int menu_utama, jumlah_data = 0, mode;
     char kembali;
+    string fileDipilih, fileCari, fileUrut;
     
     char exePath[MAX_PATH];
 	GetModuleFileNameA(NULL, exePath, MAX_PATH);
@@ -431,6 +522,7 @@ int main(){
                         inputData(&jumlah_data);
                     break;
                     case 2:
+                        muatData(fileDipilih, &jumlah_data);
                         updateData(&jumlah_data);
                     break;
                     default:
@@ -451,7 +543,11 @@ int main(){
                 }
             break;
             case 2:
-                tampilData();
+                daftarFile();
+                cout << "\nNama file yang ingin dibuka : ";
+                cin >> fileDipilih;
+                muatData(fileDipilih, &jumlah_data);
+                tampilData(&jumlah_data);
                 cout<<"\nKembali ke menu utama? (y/t) : ";
                 cin>>kembali;
                 if(kembali == 'y'){
@@ -463,15 +559,27 @@ int main(){
                 }
             break;
             case 3:
-                searching();
+                daftarFile();
+                cout << "\nCari data dari file : ";
+                cin >> fileCari;    
+                muatData(fileCari, &jumlah_data);
+                searching(jumlah_data);
                 system("cls");
             break;
             case 4:
+                daftarFile();
+                cout << "\nUrutkan data pada file : ";
+                cin >> fileUrut;
+                muatData(fileUrut, &jumlah_data);    
                 sorting(jumlah_data);
                 system("cls");
             break;
             case 5:
-                hapusData();
+                daftarFile();
+                cout << "\nHapus data dari file : ";
+                cin >> fileDipilih;
+                muatData(fileDipilih, &jumlah_data);
+                hapusData(fileDipilih, &jumlah_data);
                 system("cls");
             break;
             case 6:
