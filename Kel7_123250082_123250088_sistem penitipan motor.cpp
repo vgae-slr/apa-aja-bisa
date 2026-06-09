@@ -172,13 +172,9 @@ void inputData(int *jumlahData){
     }
 }
 
-void updateData(int *jumlahData){
+void updateData(string fileUp, int *jumlahData){
     int update;
-    string plat_update, fileUp, keluar;
-
-    daftarFile();
-    cout << "Update data dari file : ";
-    cin >> fileUp;
+    string plat_update, keluar;
 
     cout << "No. Plat motor yang diupdate : ";
     cin.ignore();
@@ -275,8 +271,11 @@ void hapusData(string fileDipilih, int *jumlahData){
 
     fstream file(fileDipilih, ios::in);
     fstream temp("temp.txt", ios::out);
+    
+    cout << string(116,'-') << endl;
+    cetakTabel(*jumlahData);
 
-    cout << "Masukkan No. Plat yang ingin dihapus : ";
+    cout << "\nMasukkan No. Plat dari data motor yang ingin dihapus : ";
     cin.ignore();
     getline(cin, plat);
 
@@ -426,8 +425,8 @@ void sorting(int jumlahData){
         cout<<"2. Ascending\n";
         cout<<"Pilih : ";
         cin>>sortOrder;
-
-        system("cls");
+        
+        cout << string(116,'-') << endl;
         
         insertionSort(jumlahData, sortBy, sortOrder);
         cetakTabel(jumlahData);
@@ -522,8 +521,11 @@ int main(){
                         inputData(&jumlah_data);
                     break;
                     case 2:
+						daftarFile();
+						cout << "Update data dari file : ";
+						cin >> fileDipilih;
                         muatData(fileDipilih, &jumlah_data);
-                        updateData(&jumlah_data);
+                        updateData(fileDipilih, &jumlah_data);
                     break;
                     default:
                         cout << "Pilihan tidak valid!\n";
